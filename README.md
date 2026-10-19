@@ -67,7 +67,7 @@ Full codec benchmarking will be completed in subsequent milestones.
 
 **Implementation:**
 
-`notebooks/Student_A_Dataset_Preparation.ipynb`
+`notebooks/Dataset_Preparation.ipynb`
 
 **Outputs:**
 - Kodak image collection
@@ -93,7 +93,7 @@ Full codec benchmarking will be completed in subsequent milestones.
 
 **Implementation:**
 
-`notebooks/Student_B_AI_Compression.ipynb`
+`notebooks/AI_Compression.ipynb`
 
 **Outputs:**
 - Reconstructed images
@@ -112,7 +112,7 @@ Full codec benchmarking will be completed in subsequent milestones.
 
 **Implementation:**
 
-`notebooks/Student_C_Evaluation.ipynb`
+`notebooks/Evaluation.ipynb`
 
 **Outputs:**
 - Image quality evaluation results
