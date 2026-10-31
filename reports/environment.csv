@@ -1,0 +1,7 @@
+Library,Version
+Python,3.13.18
+Platform,Linux-6.6.159+-x86_64-with-glibc2.39
+Pillow,11.3.0
+Pandas,2.2.3
+Matplotlib,3.10.0
+Requests,2.32.4

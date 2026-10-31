@@ -1,0 +1,4 @@
+Dataset,Total_Images,Valid_Images,Failed_Images,Average_Width,Average_Height,Average_Size_KB
+CLIC,32,32,0,1769.81,1630.19,3268.94
+Kodak,24,24,0,704.0,576.0,626.4
+Tecnick,2700,2700,0,367.78,367.78,204.93
