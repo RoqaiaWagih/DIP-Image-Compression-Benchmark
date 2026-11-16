@@ -1,0 +1,7 @@
+compressai==1.2.8
+torch==2.14.1
+numpy==2.4.6
+pandas==2.2.3
+pillow==11.3.0
+matplotlib==3.10.0
+pytorch-msssim==1.0.0
