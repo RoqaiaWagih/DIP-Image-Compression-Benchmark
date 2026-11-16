@@ -1,139 +1,134 @@
 # DIP Image Compression Benchmark
 
-### Rate–Distortion Benchmarking Suite: Classical vs. Learned Image Codecs
+### Rate-Distortion Benchmarking Suite: Classical vs. Learned Image Codecs
 
-**Course:** Digital Image Processing  
+**Course:** CSE 681 Digital Image Processing & Video Processing  
 **Project:** 30  
 **Team:** 3 students  
 **Duration:** 9 weeks  
-**Status:** In development — Milestone 1 foundation
+**Status:** Milestone 2 in progress (Milestone 1 submitted)
 
 ## Overview
 
-This project develops a **reproducible benchmarking pipeline** for comparing traditional image compression formats with pretrained neural image compression models. The goal is to understand the trade-offs between **compressed bitrate, reconstructed image quality, and computational cost** under a consistent evaluation protocol.
+This project develops a **reproducible benchmarking pipeline** for comparing traditional image compression formats with pretrained neural image compression models. The goal is to understand the trade-offs between **compressed bitrate, reconstructed image quality, and computational cost** under one consistent evaluation protocol.
 
-The final benchmark will use shared lossless test images, multiple operating points per codec, standardized image-quality metrics, and documented software/hardware settings. The project emphasizes **fair comparison and reproducibility**, rather than training a new compression model.
+The benchmark uses shared lossless test images, multiple operating points per codec, standard image-quality metrics, and documented software and hardware settings. The project focuses on **fair comparison and reproducibility**, not on training a new compression model.
 
 ## Compression Methods
 
-| Category | Codecs / models |
-|---|---|
-| Classical | JPEG, JPEG2000, WebP, AVIF |
-| Learned | Factorized Prior (`bmshj2018_factorized`) |
-| Learned | Scale Hyperprior (`bmshj2018_hyperprior`) |
-| Learned | Cheng2020 Anchor (`cheng2020_anchor`) |
+| Category | Codecs / models | Quality levels |
+|---|---|---|
+| Classical | JPEG, JPEG 2000, WebP, AVIF | quality grid covering about 0.075 to 1.5 bpp |
+| Learned | Factorized Prior (`bmshj2018_factorized`) | 1 to 8 |
+| Learned | Scale Hyperprior (`bmshj2018_hyperprior`) | 1 to 8 |
+| Learned | Cheng2020 Anchor (`cheng2020_anchor`) | 1 to 6 |
 
-Learned models are loaded from pretrained checkpoints through [CompressAI](https://github.com/InterDigitalInc/CompressAI). Availability of individual checkpoints and quality levels depends on the installed version.
+Learned models are loaded as pretrained MSE-optimized checkpoints from [CompressAI](https://github.com/InterDigitalInc/CompressAI) 1.2.8.
 
 ## Datasets
 
-| Dataset | Role | Source |
-|---|---|---|
-| Kodak Lossless True Color Image Suite | Development and initial testing (24 images) | [Kodak](https://r0k.us/graphics/kodak/) |
-| Tecnick | High-resolution extended evaluation | [Tecnick](https://sourceforge.net/projects/testimages/files/) |
-| CLIC validation | Final benchmark evaluation | [CLIC](https://archive.compression.cc/2025/tasks/) |
+| Dataset | Images used | Source | License |
+|---|---|---|---|
+| Kodak | all 24 images, 768x512 | [r0k.us/graphics/kodak](https://r0k.us/graphics/kodak/) | no formal license; released by Kodak for unrestricted usage |
+| Tecnick (TESTIMAGES) | standard subset of 100 RGB images, 1200x1200 (selection in progress) | [TESTIMAGES on SourceForge](https://sourceforge.net/projects/testimages/files/OLD/OLD_SAMPLING/) | CC BY-NC-SA 4.0 |
+| CLIC 2025 validation | all 32 images | [CLIC 2025 tasks](https://archive.compression.cc/2025/tasks/) | Unsplash license |
 
-Dataset versions, subsets, redistribution permissions, and integrity checks will be recorded before final experiments. Large datasets are not intended to be committed to Git.
+Images are not committed to this repository. The notebooks download them, check every file, and record dimensions, format, colour mode, file size and SHA-256 checksums in `reports/`.
 
 ## Evaluation Metrics
 
-- **Bits per pixel (bpp):** `(compressed_bytes × 8) / (width × height)`; lower means fewer compressed bits per source pixel.
+- **Bits per pixel (bpp):** `(compressed_bytes x 8) / (width x height)`, using the original image size.
 - **PSNR:** pixel-wise reconstruction fidelity in dB; higher is better.
 - **SSIM:** structural similarity; higher is better.
 - **MS-SSIM:** structural similarity across multiple scales; higher is better.
-- **Encoding and decoding time:** runtime measurements under recorded hardware and software conditions.
+- **Encoding and decoding time:** measured on the same CPU runtime for all codecs.
 
-The final evaluation will measure **actual decodable bitstreams**, including necessary headers and metadata. Early payload-only measurements will be labeled separately.
+## Evaluation Protocol
 
-## Benchmarking Workflow
-
-1. **Prepare data:** acquire lossless images, verify integrity, and export metadata.
-2. **Configure codecs:** record codec/library versions, model checkpoints, quality settings, and device.
-3. **Compress:** encode each source image at several bitrate or quality settings.
-4. **Reconstruct:** decode the saved bitstream and restore the original image dimensions.
-5. **Evaluate:** calculate bpp, PSNR, SSIM, MS-SSIM, and encoding/decoding times.
-6. **Compare:** create rate–distortion curves and tables at matched or interpolated bitrates.
-7. **Report:** publish reproducible results, methodology, limitations, and conclusions.
-
-### Fair-comparison principles
-
-Use identical source images, consistent RGB reconstruction metrics, original spatial dimensions, actual stored bitstream sizes, multiple operating points, and a documented timing methodology. For learned codecs, padding/cropping and any decoding metadata must be handled consistently. CPU and GPU timings should be reported separately rather than treated as directly comparable.
+1. **Same inputs:** every codec receives the same lossless 8-bit RGB image, and every reconstruction keeps the original size.
+2. **Padding:** for learned codecs, images are zero-padded symmetrically to a multiple of 64 and cropped back after decoding.
+3. **Rate:** bpp is computed from the real compressed file or entropy-coded bitstream, not from estimated likelihoods. Payload-only and total (payload plus header) bpp are recorded separately.
+4. **Distortion:** learned-codec outputs are rounded to 8-bit values before evaluation, and the same metric function is used for all codecs.
+5. **Averaging:** metrics are computed per image and averaged over each dataset for every codec and quality level.
+6. **BD-rate:** computed against JPEG, only over the overlapping bitrate range.
+7. **Timing:** CPU only, one warm-up run before timing, median reported.
+8. **Reproducibility:** fixed random seed (42), pinned package versions, recorded encoder settings.
 
 ## Repository Layout
 
 ```text
 DIP-Image-Compression-Benchmark/
 ├── notebooks/
-│   ├── Dataset_Preparation.ipynb
-│   └── AI_Compression_&_Evaluation_milestone_1.ipynb
-├── datasets/
-│   └── README.md
+│   ├── Dataset_Preparation_kodak.ipynb                  (M1, Kodak download and checks)
+│   ├── Dataset_Preparation_milestone1.ipynb             (M1, Kodak, Tecnick and CLIC preparation)
+│   ├── AI_Compression_try.ipynb                         (M1, first test of the learned codecs)
+│   ├── Evaluation_try.ipynb                             (M1, first metrics and JPEG test)
+│   ├── AI_Compression_&__Evaluation_milestone_1.ipynb   (M1, model loading, preprocessing, metrics)
+│   └── M2_StudentB_Learned_Codecs.ipynb                 (M2, learned codecs on all Kodak images)
+├── references/
+│   └── references.bib
 ├── reports/
-│   └── evaluation_protocol.md
+│   ├── dataset_information_kodak.csv
+│   ├── dataset_summary.csv
+│   ├── validation_summary.csv
+│   └── environment.csv
 ├── results/
-│   ├── classical/
-│   ├── learned/
-│   └── comparisons/
+│   ├── AI_compression/      (M1 single-image test)
+│   ├── evaluation/          (M1 JPEG and metric tests)
+│   └── M2_learned/          (M2 learned-codec results on Kodak)
 ├── .gitignore
-└── README.md
+├── README.md
+└── README_Milestone_1.md
 ```
-
-*This is a target layout. Not all files or output directories are present yet. The notebook names above correspond to the current two-notebook workflow; rename them in the repository if needed.*
 
 ## Getting Started (Google Colab)
 
-1. Open the notebooks from this repository in Google Colab.
-2. Run `Dataset_Preparation.ipynb` to obtain/organize images and produce validation, metadata, and reproducibility reports.
-3. Run `AI_Compression_&_Evaluation_milestone_1.ipynb` to configure CompressAI, load pretrained models, prepare tensors, and validate quality-metric functions.
-4. For later milestones, run codec experiments and export result CSVs, bitstreams, and plots to persistent storage.
+1. Open a notebook from this repository in Google Colab and select the CPU runtime.
+2. Run the installation cell, then restart the session (Runtime, Restart session).
+3. Run the rest of the notebook with Runtime, Run cell and below.
 
-The notebooks contain their own installation cells. Typical dependencies include:
+Main dependencies:
 
 ```python
-%pip install pillow numpy pandas matplotlib scikit-image tqdm
-%pip install pytorch-msssim
-%pip install "compressai==1.2.8"
+%pip install "compressai==1.2.8" pytorch-msssim
+%pip install pillow numpy pandas matplotlib
 ```
 
-**Note:** Check the Colab Python/PyTorch runtime and CompressAI compatibility before installation. GPU use is optional for some tasks; timings must identify the execution device. Colab files are temporary unless exported to Drive or downloaded.
+**Note:** Colab now uses Python 3.13, while CompressAI 1.2.8 asks for NumPy older than 2.0. The installation cell of `M2_StudentB_Learned_Codecs.ipynb` handles this case. Colab files are temporary, so results are saved to Google Drive.
 
 ## Development Roadmap
 
 | Milestone | Due | Weight | Scope |
 |---|---|---:|---|
-| M1 — Research & setup | Week 3 | 15% | Dataset preparation, environment setup, model loading, preprocessing, evaluation functions, experimental protocol |
-| M2 — Implementation | Week 6 | 35% | Classical and learned codec encoding/decoding, multi-rate tests, preliminary comparisons |
-| M3 — Final benchmark | Week 9 | 50% | Complete rate–distortion analysis, reproducibility checks, final report, repository, and demo |
+| M1 Proposal and literature review | Week 3 | 15% | Dataset preparation, environment setup, model loading, preprocessing, evaluation functions, protocol |
+| M2 Implementation and preliminary results | Week 6 | 35% | Classical and learned codecs on Kodak at all quality levels, check against published CompressAI results, first comparison table |
+| M3 Final report and presentation | Week 9 | 50% | All datasets, RD curves, BD-rate, timing, ablations, final report, repository and demo |
 
-### Current implementation
+### Current status
 
-The current notebooks contain dataset preparation and validation workflows for Kodak, Tecnick, and CLIC; metadata and SHA-256 utilities; environment configuration; pretrained model loading and inspection; RGB-to-tensor preprocessing and padding; and bpp, PSNR, SSIM, and MS-SSIM evaluation functions. **End-to-end results for all seven codecs are not yet claimed.** Benchmark tables and plots will be published as experiments are run and verified.
-
-## Expected Deliverables
-
-- Reproducible Python/Colab benchmarking workflow
-- Validated dataset inventory and metadata
-- Codec settings and model checkpoint records
-- Per-image and aggregate results in CSV format
-- Rate–distortion curves and runtime comparisons
-- Final technical report discussing trade-offs and limitations
+- **Milestone 1 (done):** dataset download and validation for Kodak and CLIC with SHA-256 checksums, environment setup, model loading, preprocessing and metric functions, single-image feasibility test.
+- **Milestone 2 (in progress):** the three learned codecs are being run on all 24 Kodak images at every quality level and compared with the results published by CompressAI. Classical codec results and the selection of the 100-image Tecnick subset are in progress. Results are added to `results/` after they are verified.
 
 ## Team
 
-| Role | Responsibility | Member |
+| Member | Role | Responsibility |
 |---|---|---|
-| Dataset & classical codecs | Data validation, metadata, JPEG/JPEG2000/WebP/AVIF baselines | TBD |
-| Learned codecs | CompressAI models, compression/decompression, timing | TBD |
-| Evaluation & reporting | Metrics, fair protocol, RD plots, result analysis | TBD |
+| Elham Ehab | Student A in M1, Student B in M2 | Datasets and literature review (M1); learned codecs on Kodak (M2) |
+| Roqaia Khalid | Student B in M1 | CompressAI setup, model loading, preprocessing and first tests (M1) |
+| Shimaa Sherif | Student C | Evaluation metrics, protocol, classical codecs and comparisons |
 
 ## References
 
-1. [CompressAI — GitHub repository](https://github.com/InterDigitalInc/CompressAI)
-2. [Ballé et al., End-to-End Optimized Image Compression (2017)](https://arxiv.org/abs/1611.01704)
-3. [Ballé et al., Variational Image Compression with a Scale Hyperprior (2018)](https://arxiv.org/abs/1802.01436)
-4. [Cheng et al., Learned Image Compression with Discretized Gaussian Mixture Likelihoods and Attention Modules (2020)](https://arxiv.org/abs/2001.01568)
-5. [CLIC Image Compression Challenge](https://compression.cc/)
+The full bibliography is in [`references/references.bib`](references/references.bib). Main references:
+
+1. Ballé, Laparra and Simoncelli, [End-to-End Optimized Image Compression](https://arxiv.org/abs/1611.01704), ICLR 2017
+2. Ballé et al., [Variational Image Compression with a Scale Hyperprior](https://arxiv.org/abs/1802.01436), ICLR 2018
+3. Minnen, Ballé and Toderici, [Joint Autoregressive and Hierarchical Priors for Learned Image Compression](https://arxiv.org/abs/1809.02736), NeurIPS 2018
+4. Cheng et al., [Learned Image Compression with Discretized Gaussian Mixture Likelihoods and Attention Modules](https://arxiv.org/abs/2001.01568), CVPR 2020
+5. Bégaint et al., [CompressAI](https://github.com/InterDigitalInc/CompressAI), 2020
+6. Tatwawadi et al., [What Matters in Practical Learned Image Compression](https://arxiv.org/abs/2605.05148), CVPR 2026
+7. [CLIC 2025 Challenge on Learned Image Compression](https://archive.compression.cc/2025/tasks/)
 
 ---
 
-*Academic project for the Digital Image Processing course. Documentation and experimental results will be updated as milestones are completed.*
+*Academic project for the CSE 681 Digital Image Processing course. Results will be updated as milestones are completed.*
