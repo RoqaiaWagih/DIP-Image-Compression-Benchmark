@@ -114,8 +114,8 @@ Main dependencies:
 | Member | Role | Responsibility |
 |---|---|---|
 | Elham Ehab | Student A in M1, Student B in M2 | Datasets and literature review (M1); learned codecs on Kodak (M2) |
-| Roqaia Khalid | Student B in M1 | CompressAI setup, model loading, preprocessing and first tests (M1) |
-| Shimaa Sherif | Student C | Evaluation metrics, protocol, classical codecs and comparisons |
+| Roqaia Khalid | Student B in M1, Student A in M2 | CompressAI setup and first tests (M1); classical codecs and Tecnick subset (M2) |
+| Shimaa Sherif | Student C | Evaluation metrics, protocol and codec comparisons |
 
 ## References
 
